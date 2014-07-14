@@ -1,0 +1,32 @@
+.form-field-container,
+.groups-and-users-container{
+	overflow: hidden;
+	clear: both;
+	margin-bottom: 20px;
+}
+
+	.form-field-container .form-field{
+		width: 50%;
+		float: left;
+	}
+
+	.form-field-container .handle-outliers-random-fields{
+		clear: both;
+	}
+
+	.handle-outliers-random-fields{
+		display: none; /* Hide these fields by default, only show them if we have outliers */
+
+	}
+
+	.error-message-container{
+		display: none; /* No error message by default */
+		clear: both;
+		padding: 5px;
+		margin: 10px 0 0;
+		background: #ff9494;
+	}
+
+		.error-message-container p{
+			margin: 0;
+		}
