@@ -1,5 +1,5 @@
 jQuery( document ).ready( function( $ ){
-console.log( sugData );
+
 	$( '.groups-and-users-container' ).on( 'keyup', 'input', alterGroupInputsAutomatically );
 
 	var totalUsers 			= augData.numOfUsers;
@@ -60,13 +60,6 @@ console.log( sugData );
 			return;
 		}
 		
-		// If they enter a number more than there are users, well...no
-		if( parseInt( valueChangedTo ) > parseInt( totalUsers ) ){
-			displayErrorMessage( 'You have chosen more users or groups than there are users on this site.' );
-		}else{
-			hideErrorMessage();
-		}
-
 		var factorAndOutliers 	= calcIntFactorWithOutliers( valueChangedTo, totalUsers );
 
 		var factor 				= factorAndOutliers.factor;
@@ -79,6 +72,17 @@ console.log( sugData );
 
 		// Set the other field value
 		otherField.val( factor );
+
+		// If they enter a number more than there are users, well...no
+		if( parseInt( valueChangedTo ) > parseInt( totalUsers ) ){
+			displayErrorMessage( 'You have chosen more users or groups than there are users on this site.' );
+		}else if( parseInt( outliers ) > parseInt( $( '#random-num-users-per-group' ).val() ) ){
+			displayErrorMessage( 'There will be more outliers than users per group.' );
+		}else{
+			hideErrorMessage();
+		}
+
+		
 
 		// If we have outliers, show the fields and update the text
 		if( outliers && outliers > 0 ){

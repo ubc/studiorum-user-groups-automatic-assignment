@@ -30,3 +30,7 @@
 		.error-message-container p{
 			margin: 0;
 		}
+
+		.error-message-container.showme{
+			display: block;
+		}

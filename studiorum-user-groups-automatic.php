@@ -113,7 +113,7 @@
 
 			?>
 
-			<h3><?php _e( 'Automatic User Group Assignment', 'studiorum-user-groups-automatic' ); ?></h3>
+			<h3 id="auto-user-group-assignment-title"><?php _e( 'Automatic User Group Assignment', 'studiorum-user-groups-automatic' ); ?></h3>
 
 			<form id="automatic-group-assignment" method="post" action="" class="validate">
 
@@ -253,7 +253,6 @@
 
 		public function studiorum_user_groups_automatic_assignment_handle_random_fields()
 		{
-
 			$validatedInput = $this->validateInput( $_REQUEST, 'random-group' );
 
 			$numberOfUsers = $this->numberOfUsers();
@@ -291,7 +290,7 @@
 		public function addGroups( $numOfGroupsToCreate = 1, $numOfUsersInEachGroup = 1, $numOfOutliers = 0, $outlierAssignment = false )
 		{
 
-			// We need to geta list of all user IDs on this site as an array and then spint that into $numOfGroupsToCreate chunks
+			// We need to get a list of all user IDs on this site as an array and then split that into $numOfGroupsToCreate chunks
 			global $localizationData, $Studiorum_User_Groups;
 			$allUsers = $localizationData['userData'];
 
@@ -299,7 +298,7 @@
 			shuffle( $allUsers );
 
 			// Now chunk it
-			$groupsOfUsers = array_chunk( $allUsers, $numOfGroupsToCreate );
+			$groupsOfUsers = array_chunk( $allUsers, $numOfUsersInEachGroup );
 
 			$outliers = false;
 
@@ -310,30 +309,10 @@
 				$outliers = $groupsOfUsers[$numOfGroupsToCreate-1];
 
 				// Pop off the last group
-				$groupsOfUsers = array_pop( $groupsOfUsers );
+				$outliersGroup = array_pop( $groupsOfUsers );
 
 				if( !$outlierAssignment || $outlierAssignment == '' ){
 					$outlierAssignment = 'handle-outliers-random';
-				}
-
-				switch( $outlierAssignment )
-				{
-
-					case 'handle-outliers-manual':
-						
-						// Programming-wise we don't have to do anything here.
-						// $todo: Does it make sense to tell the user which users are left? Auto fill the 'Users' box with
-						// their details, perhaps?
-
-						break;
-					
-					case 'handle-outliers-random':
-					default:
-						
-						
-
-						break;
-
 				}
 
 			}
@@ -369,7 +348,135 @@
 
 			}
 
+			if( !$outliers ){
+				return;
+			}
+
+			switch( $outlierAssignment )
+			{
+
+				case 'handle-outliers-manual':
+					
+					// Programming-wise we don't have to do anything here.
+					// $todo: Does it make sense to tell the user which users are left? Auto fill the 'Users' box with
+					// their details, perhaps?
+					$this->displayUsersNotAddedToGroups( $outliersGroup );
+
+					break;
+				
+				case 'handle-outliers-random':
+				default:
+					
+					// $outliersGroup is an array of users that need to be randonly assigned to a group.
+					$this->addUsersToRandomGroups( $outliersGroup );
+					
+					break;
+
+			}
+
 		}/* addGroups */
+
+
+		/**
+		 * Helper method to assign users randomly to groups
+		 *
+		 * @since 0.1
+		 *
+		 * @param array $outliersGroup An array of users to add randomly to groups
+		 * @return null
+		 */
+
+		private function addUsersToRandomGroups( $outliersGroup = array() )
+		{
+
+			if( empty( $outliersGroup ) ){
+				return;
+			}
+
+			global $Studiorum_User_Groups;
+
+			// Fetch the existing groups
+			$existingData = $Studiorum_User_Groups->getExistingData();
+
+			if( !$existingData || !is_array( $existingData ) || empty( $existingData ) ){
+				return;
+			}
+
+			// Shuffle the array so it's random, keeping the keys as it's an associative array
+			$shuffleKeys = array_keys( $existingData );
+			shuffle( $shuffleKeys );
+			$newArray = array();
+			foreach( $shuffleKeys as $key ){
+			    $newArray[$key] = $existingData[$key];
+			}
+
+			$existingData = $newArray;
+
+			$numOfOutliers = count( $outliersGroup );
+
+			for( $i=0; $i < $numOfOutliers; $i++ )
+			{ 
+
+				// The User ID to add
+				$userIDToAdd = $outliersGroup[$i]['userID'];
+
+				// Which array we're adding it to
+				$titleOfThisKey = $shuffleKeys[$i];
+
+				// Add it
+				$existingData[$titleOfThisKey]['users'][] = $userIDToAdd;
+
+			}
+
+			// Set the data - we're completely overwriting what's there as it's all merged
+			$Studiorum_User_Groups->setData( $existingData );
+
+		}/* addUsersToRandomGroups() */
+
+
+		/**
+		 * When we have manual assignment of outliers, display which users haven't been assigned
+		 *
+		 * @since 0.1
+		 *
+		 * @param array $outliersGroup An array of users not assigned
+		 * @return string|int returnDescription
+		 */
+
+		private function displayUsersNotAddedToGroups( $outliersGroup = array() )
+		{
+
+			if( !$outliersGroup || !is_array( $outliersGroup ) || empty( $outliersGroup ) ){
+				return;
+			}
+
+			// We just need the UserIDs. Start fresh.
+			$userIDS = array();
+
+			foreach( $outliersGroup as $key => $user ){
+				$userIDs[] = $user['userID'];
+			}
+
+			$userIDString = implode( ',', $userIDs );
+
+			// Let's add the outliers into the users box automatically, add a dummy title, focus the
+			// title input and show a message to the user to tell them what is happening
+			?>
+
+			<script>
+				var titleElem = document.getElementById( 'group-title' );
+				titleElem.value = "Enter Group Title";
+				titleElem.focus();
+
+				var usersElem = document.getElementById( 'group-users' );
+				usersElem.value = "<?php echo $userIDString; ?>";
+			</script>
+
+			<div id="auto-group-message" class="error-message-container showme"><?php _e( 'The users which were not automatically associated with a group have been placed into the users box above. Please provide a title and add that group.', 'studiorum-user-groups-automatic' ); ?></div>
+
+			<?php
+
+		}/* displayUsersNotAddedToGroups() */
 
 
 		/**
@@ -478,7 +585,7 @@
 
 			$output['random-num-groups'] 			= ( isset( $request['random-num-groups'] ) ) ? intval( sanitize_text_field( $request['random-num-groups'] ) ) : false;
 			$output['random-num-users-per-group'] 	= ( isset( $request['random-num-users-per-group'] ) ) ? intval( sanitize_text_field( $request['random-num-users-per-group'] ) ) : false;
-			$output['handle-outliers'] 				= ( isset( $request['handle-outliers'] ) ) ? intval( sanitize_text_field( $request['handle-outliers'] ) ) : false;
+			$output['handle-outliers'] 				= ( isset( $request['handle-outliers'] ) ) ? sanitize_text_field( $request['handle-outliers'] ) : false;
 
 			return $output;
 
