@@ -431,6 +431,12 @@
 			// Set the data - we're completely overwriting what's there as it's all merged
 			$Studiorum_User_Groups->setData( $existingData );
 
+			?>
+			<script>
+				window.location.reload();
+			</script>
+			<?php
+
 		}/* addUsersToRandomGroups() */
 
 
