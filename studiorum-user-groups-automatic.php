@@ -344,7 +344,7 @@
 				);
 
 				// Add the group
-				$Studiorum_User_Groups->addNewGroup( $newDataToAdd );
+				$Studiorum_User_Groups->addNewGroup( $newDataToAdd, false, false ); // 3rd param means no refresh
 
 			}
 
