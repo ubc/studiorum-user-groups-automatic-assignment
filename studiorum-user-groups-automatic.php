@@ -81,6 +81,9 @@
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts__loadJS' ), 20 );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts__loadCSS' ) );
 
+			// Register ourself as an addon
+			add_filter( 'studiorum_modules', array( $this, 'studiorum_modules__registerAsModule' ) );
+
 		}/* __construct() */
 
 
@@ -839,6 +842,41 @@
 			return $answer;
 
 		}/* calcIntFactorsWithOutliers() */
+
+
+		/**
+		 * Register ourself as a studiorum addon, so it's available in the main studiorum page
+		 *
+		 * @since 0.1
+		 *
+		 * @param array $modules Currently registered modules
+		 * @return array $modules modified list of modules
+		 */
+
+		public function studiorum_modules__registerAsModule( $modules )
+		{
+
+			if( !$modules || !is_array( $modules ) ){
+				$modules = array();
+			}
+
+			$modules['studiorum-user-groups-automatic'] = array(
+				'id' 				=> 'user_groups_automatic',
+				'plugin_slug'		=> 'studiorum-user-groups-automatic',
+				'title' 			=> __( 'Automatic User Groups', 'studiorum' ),
+				'requires'			=> 'user_groups',
+				'icon' 				=> 'networking', // dashicons-#
+				'excerpt' 			=> __( 'Automatically create random user groups. Requires the User Groups module.', 'studiorum' ),
+				'image' 			=> 'http://dummyimage.com/310/162',
+				'link' 				=> 'http://code.ubc.ca/studiorum/user-groups-automatic',
+				'content' 			=> __( '<p>Instead of manually crafting your user groups, use the Automatic User Groups addon to randomly assign users to groups. Tell is how many groups you want or how many users per group and it does the rest. Also allows you to specify what happens with outliers should there be an uneven number of users per group.</p>', 'studiorum' ),
+				'content_sidebar' 	=> 'http://dummyimage.com/300x150',
+				'date'				=> '2014-06-01'
+			);
+
+			return $modules;
+
+		}/* studiorum_modules__registerAsModule() */
 
 	}/* class Studiorum_User_Groups_Automatic() */
 
