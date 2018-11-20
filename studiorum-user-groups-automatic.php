@@ -323,7 +323,7 @@
 			// Now loop over each of these chunks and create a group with these users
 			foreach( $groupsOfUsers as $key => $userGroup )
 			{
-				
+
 				// We don't want no zero-based nonsense
 				$groundOne = $key + 1;
 
@@ -359,20 +359,20 @@
 			{
 
 				case 'handle-outliers-manual':
-					
+
 					// Programming-wise we don't have to do anything here.
 					// $todo: Does it make sense to tell the user which users are left? Auto fill the 'Users' box with
 					// their details, perhaps?
 					$this->displayUsersNotAddedToGroups( $outliersGroup );
 
 					break;
-				
+
 				case 'handle-outliers-random':
 				default:
-					
+
 					// $outliersGroup is an array of users that need to be randonly assigned to a group.
 					$this->addUsersToRandomGroups( $outliersGroup );
-					
+
 					break;
 
 			}
@@ -418,7 +418,7 @@
 			$numOfOutliers = count( $outliersGroup );
 
 			for( $i=0; $i < $numOfOutliers; $i++ )
-			{ 
+			{
 
 				// The User ID to add
 				$userIDToAdd = $outliersGroup[$i]['userID'];
@@ -510,7 +510,7 @@
 				case 'initial':
 					$output = $this->validateInitialInput( $request );
 					break;
-			
+
 				case 'random-group':
 					$output = $this->validateDeletedFieldsInput( $request );
 					break;
@@ -518,7 +518,7 @@
 				default:
 					$output = $this->validateInitialInput( $request );
 					break;
-			
+
 			}
 
 			$output = apply_filters( 'studiorum_user_groups_automatic_validated_input', $output );
@@ -730,8 +730,8 @@
 		 *
 		 * @since 0.1
 		 *
-		 * @param 
-		 * @return 
+		 * @param
+		 * @return
 		 */
 
 		public function admin_enqueue_scripts__loadCSS()
@@ -743,7 +743,7 @@
 
 
 		/**
-		 * Calculate the number of users for this site. 
+		 * Calculate the number of users for this site.
 		 *
 		 * @since 0.1
 		 *
@@ -761,7 +761,7 @@
 			global $localizationData;
 
 			// In order to help out we'll let the user know how many users there are
-			$numberOfUsers = count( $localizationData['userData'] );
+			$numberOfUsers = ( is_countable( $localizationData['userData'] ) ) ? count( $localizationData['userData'] ) : 0;
 
 			// Cache it so we don't keep calling count()
 			$this->numberOfUsers = $numberOfUsers;
@@ -774,7 +774,7 @@
 
 		/**
 		 * Calculate the initial example group sizes. This basically square roots the number of users (rounding to the nearest integer)
-		 * and uses that as the number of groups. Then calculate the number of people to put in those groups and also the number of 
+		 * and uses that as the number of groups. Then calculate the number of people to put in those groups and also the number of
 		 * outliers if any.
 		 *
 		 * @since 0.1
@@ -812,8 +812,8 @@
 
 
 		/**
-		 * Helper method which helps calculate one integer which will multiple with the one provided 
-		 * to be as close to the total as possible - without going over - and also return the number 
+		 * Helper method which helps calculate one integer which will multiple with the one provided
+		 * to be as close to the total as possible - without going over - and also return the number
 		 * of outliers.
 		 *
 		 * i.e. If $total is 20, and $initial is 7, the $otherNumber will be 2 and $outliers is 6
